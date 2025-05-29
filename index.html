@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DataPress by Ninda & Alip</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/compressorjs/1.1.1/compressor.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #A0C4FF 0%, #FFB5A7 100%);
+            color: #333333;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: rgba(241, 243, 245, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            margin-top: 20px;
+        }
+        h1 {
+            color: #333333;
+            margin-bottom: 30px;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        .preview {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .preview > div {
+            flex: 1;
+            min-width: 300px;
+            max-width: 400px;
+            text-align: center;
+        }
+        .preview h3 {
+            margin-bottom: 15px;
+            color: #333333;
+        }
+        .preview div {
+            background-color: #FFFFFF;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+        .preview div:hover {
+            transform: translateY(-5px);
+        }
+        .preview img {
+            max-width: 300px;
+            border: 2px solid #A0C4FF;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .preview img:hover {
+            box-shadow: 0 5px 15px rgba(160, 196, 255, 0.3);
+        }
+        .controls {
+            margin: 20px 0;
+            background-color: #FFFFFF;
+            padding: 25px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .file-upload-container {
+            position: relative;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .file-upload-container input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        .file-upload-label {
+            display: block;
+            padding: 20px;
+            background-color: #F1F3F5;
+            border: 2px dashed #A0C4FF;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .file-upload-label:hover {
+            background-color: #E8F0FE;
+            border-color: #FFB5A7;
+        }
+        .file-upload-icon {
+            font-size: 24px;
+            color: #A0C4FF;
+            margin-bottom: 10px;
+        }
+        .file-upload-text {
+            color: #333333;
+            font-size: 16px;
+            margin: 5px 0;
+        }
+        .file-upload-hint {
+            color: #666666;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        input[type="range"] {
+            width: 100%;
+            margin: 15px 0;
+            accent-color: #A0C4FF;
+        }
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        button {
+            padding: 12px 25px;
+            background-color: #A0C4FF;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            min-width: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        button:hover {
+            background-color: #FFB5A7;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 181, 167, 0.4);
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        #qualityValue {
+            color: #333333;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        @media (max-width: 600px) {
+            .preview {
+                flex-direction: column;
+                align-items: center;
+            }
+            .preview img {
+                max-width: 100%;
+            }
+            .container {
+                padding: 15px;
+                margin: 10px;
+            }
+            body {
+                padding: 10px;
+            }
+        }
+        .file-type-selector {
+            margin-bottom: 20px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .file-type-selector button {
+            margin: 0;
+            padding: 10px 25px;
+            background-color: #F1F3F5;
+            color: #333333;
+            border: 2px solid #A0C4FF;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .file-type-selector button:hover {
+            background-color: #E8F0FE;
+            transform: translateY(-2px);
+        }
+        .file-type-selector button.active {
+            background-color: #A0C4FF;
+            color: white;
+            border-color: #A0C4FF;
+            box-shadow: 0 4px 15px rgba(160, 196, 255, 0.3);
+        }
+        .file-info {
+            background-color: #FFFFFF;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: center;
+        }
+        .file-info p {
+            margin: 5px 0;
+            color: #333333;
+        }
+        .compression-options {
+            display: none;
+            margin: 15px 0;
+        }
+        .compression-options.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>DataPress by Ninda & Alip</h1>
+        
+        <div class="file-type-selector">
+            <button class="active" data-type="image">Image</button>
+            <button data-type="pdf">PDF</button>
+        </div>
+
+        <div class="controls">
+            <div class="file-upload-container">
+                <label class="file-upload-label">
+                    <div class="file-upload-icon">📁</div>
+                    <div class="file-upload-text">Choose a file or drag it here</div>
+                    <div class="file-upload-hint">Supported formats: Images and PDF</div>
+                    <input type="file" id="fileInput" accept="image/*,application/pdf">
+                </label>
+            </div>
+
+            <div class="file-info" id="fileInfo" style="display: none;">
+                <p>File Name: <span id="fileName"></span></p>
+                <p>File Size: <span id="fileSize"></span></p>
+                <p>File Type: <span id="fileType"></span></p>
+            </div>
+
+            <div class="compression-options" id="imageOptions">
+                <label for="quality">Image Quality: </label>
+                <input type="range" id="quality" min="0" max="100" value="80">
+                <span id="qualityValue">80%</span>
+            </div>
+
+            <div class="compression-options" id="pdfOptions">
+                <label for="pdfQuality">PDF Quality: </label>
+                <select id="pdfQuality">
+                    <option value="high">High Quality</option>
+                    <option value="medium">Medium Quality</option>
+                    <option value="low">Low Quality</option>
+                </select>
+            </div>
+
+            <div class="button-container">
+                <button id="compressBtn" disabled>
+                    <span>🔄</span> Compress
+                </button>
+            </div>
+        </div>
+
+        <div class="preview">
+            <div>
+                <h3>Original File</h3>
+                <div id="originalPreview"></div>
+            </div>
+            <div>
+                <h3>Compressed File</h3>
+                <div id="compressedPreview"></div>
+            </div>
+        </div>
+
+        <div class="button-container">
+            <button id="downloadBtn" disabled>
+                <span>⬇️</span> Download
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const fileType = document.getElementById('fileType');
+        const qualitySlider = document.getElementById('quality');
+        const qualityValue = document.getElementById('qualityValue');
+        const compressBtn = document.getElementById('compressBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const originalPreview = document.getElementById('originalPreview');
+        const compressedPreview = document.getElementById('compressedPreview');
+        const imageOptions = document.getElementById('imageOptions');
+        const pdfOptions = document.getElementById('pdfOptions');
+
+        let currentFile = null;
+        let currentFileType = 'image';
+        let compressedFile = null;
+
+        document.querySelectorAll('.file-type-selector button').forEach(button => {
+            button.addEventListener('click', function() {
+                document.querySelectorAll('.file-type-selector button').forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                currentFileType = this.dataset.type;
+                
+                switch(currentFileType) {
+                    case 'image':
+                        fileInput.accept = 'image/*';
+                        imageOptions.classList.add('active');
+                        pdfOptions.classList.remove('active');
+                        break;
+                    case 'pdf':
+                        fileInput.accept = 'application/pdf';
+                        imageOptions.classList.remove('active');
+                        pdfOptions.classList.add('active');
+                        break;
+                }
+            });
+        });
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                currentFile = file;
+                fileName.textContent = file.name;
+                fileSize.textContent = formatFileSize(file.size);
+                fileType.textContent = file.type;
+                fileInfo.style.display = 'block';
+                compressBtn.disabled = false;
+
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        originalPreview.innerHTML = `<img src="${event.target.result}" alt="Original Preview">`;
+                    };
+                    reader.readAsDataURL(file);
+                } else if (file.type === 'application/pdf') {
+                    originalPreview.innerHTML = `<embed src="${URL.createObjectURL(file)}" type="application/pdf" width="100%" height="300px">`;
+                } else {
+                    originalPreview.innerHTML = `<p>Preview not available for this file type</p>`;
+                }
+            }
+        });
+
+        qualitySlider.addEventListener('input', function() {
+            qualityValue.textContent = qualitySlider.value + '%';
+        });
+
+        compressBtn.addEventListener('click', async function() {
+            if (!currentFile) return;
+
+            if (currentFileType === 'image') {
+                new Compressor(currentFile, {
+                    quality: qualitySlider.value / 100,
+                    success(result) {
+                        compressedFile = result;
+                        compressedPreview.innerHTML = `<img src="${URL.createObjectURL(result)}" alt="Compressed Preview">`;
+                        downloadBtn.disabled = false;
+                    },
+                    error(err) {
+                        console.error(err.message);
+                        alert('Error compressing image');
+                    },
+                });
+            } else if (currentFileType === 'pdf') {
+                try {
+                    const pdfBytes = await currentFile.arrayBuffer();
+                    const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
+                    const compressedPdfBytes = await pdfDoc.save({
+                        useObjectStreams: true,
+                        addDefaultPage: false,
+                        objectsPerTick: 20,
+                        updateMetadata: false
+                    });
+                    
+                    compressedFile = new Blob([compressedPdfBytes], { type: 'application/pdf' });
+                    compressedPreview.innerHTML = `<embed src="${URL.createObjectURL(compressedFile)}" type="application/pdf" width="100%" height="300px">`;
+                    downloadBtn.disabled = false;
+                } catch (error) {
+                    console.error(error);
+                    alert('Error compressing PDF');
+                }
+            } else {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const compressed = new Blob([event.target.result], { type: currentFile.type });
+                    compressedFile = compressed;
+                    compressedPreview.innerHTML = `<p>File compressed</p>`;
+                    downloadBtn.disabled = false;
+                };
+                reader.readAsArrayBuffer(currentFile);
+            }
+        });
+
+        downloadBtn.addEventListener('click', function() {
+            if (!compressedFile) return;
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(compressedFile);
+            link.download = 'compressed_' + currentFile.name;
+            link.click();
+        });
+
+        // Add drag and drop functionality
+        const fileUploadLabel = document.querySelector('.file-upload-label');
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            fileUploadLabel.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            fileUploadLabel.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            fileUploadLabel.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            fileUploadLabel.classList.add('highlight');
+        }
+
+        function unhighlight(e) {
+            fileUploadLabel.classList.remove('highlight');
+        }
+
+        fileUploadLabel.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            fileInput.files = files;
+            // Trigger the change event
+            const event = new Event('change');
+            fileInput.dispatchEvent(event);
+        }
+
+        // Update file input styling when file is selected
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                fileUploadLabel.style.borderStyle = 'solid';
+                fileUploadLabel.style.borderColor = '#4CAF50';
+                fileUploadLabel.querySelector('.file-upload-text').textContent = file.name;
+            } else {
+                fileUploadLabel.style.borderStyle = 'dashed';
+                fileUploadLabel.style.borderColor = '#A0C4FF';
+                fileUploadLabel.querySelector('.file-upload-text').textContent = 'Choose a file or drag it here';
+            }
+        });
+    </script>
+</body>
+</html> 
